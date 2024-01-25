@@ -29,20 +29,24 @@ Vue.component("board", {
 </ul>
 </div>
 <ul class="cards">
-<li v-for="card in column1"><card :name="card.name" :points="card.points" @to-two="toColumnTwo" >   </card></li>
+<li v-for="card in column1"><card :name="card.name" :card_id="card.card_id" :count_of_checked=0 :points="card.points" @to-two="toColumnTwo" >   </card></li>
 </ul>
 </li>
 
 
 <li class="column">
 <ul>
-<li v-for="card in column2"><card :name="card.name" :points="card.points"></card></li>
+<li v-for="card in column2"><card :name="card.name" :card_id="card.card_id" :count_of_checked="card.count_of_checked" :points="card.points"  @to-three="toColumnThree"></card></li>
 </ul>
 </li>
 
 
 
-<li class="column">qeqw</li>
+<li class="column">
+<ul>
+<li v-for="card in column3"><card :name="card.name"  :points="card.points" ></card></li>
+</ul>
+</li>
 
 
 </ul>
@@ -106,6 +110,7 @@ Vue.component("board", {
                     points:this.points,
                     card_id:this.card_id
                 }
+                this.card_id +=1;
                 this.column1.push(info)
 
             }
@@ -113,31 +118,39 @@ Vue.component("board", {
 
 
         },
-        toColumnTwo(name,points){
+        toColumnTwo(name,points, card_id,count_of_checked){
             let info = {
                 name:name,
                 points:points,
+                card_id:card_id,
+                count_of_checked:count_of_checked
             }
-            
             for(i in this.column1){
-                donee = 0
-                for(j in points){
-                    if(points[j][1]){
-                        donee+=1
-                    }
-                    
-                    
-                }
-                if((this.column1[i].points.length/2) <= (donee)){
-                    console.log("qweqw")
+                
+                if(this.column1[i].card_id==card_id){
                     this.column1.splice(i, 1)
                     break
                 }
-                
-
             }
 
             this.column2.push(info)
+        },
+        toColumnThree(name,points, card_id){
+            console.log("delere")
+            let info = {
+                name:name,
+                points:points,
+                card_id:card_id,
+            }
+            for(i in this.column2){
+                
+                if(this.column2[i].card_id==card_id){
+                    this.column2.splice(i, 1)
+                    break
+                }
+            }
+
+            this.column3.push(info)
         }
     }
 });
@@ -153,7 +166,6 @@ Vue.component("card", {
     `,
     data() {
         return{
-            count_of_checked:0,
         }
     },
     methods: {
@@ -165,11 +177,13 @@ Vue.component("card", {
                 break
             }
         }    
-        
-        if ((this.count_of_tasks/2) <= (this.count_of_checked)){
-
-        this.$emit("to-two",this.name,this.points);
-        
+        console.log(this.count_of_tasks)
+        console.log(this.count_of_checked)
+        if ((this.count_of_tasks) == (this.count_of_checked)){
+        this.$emit("to-three",this.name,this.points,this.card_id);
+        }
+        else if ((this.count_of_tasks/2) <= (this.count_of_checked)){
+        this.$emit("to-two",this.name,this.points,this.card_id, this.count_of_checked);
         }
     }
     },
@@ -187,6 +201,14 @@ Vue.component("card", {
             type:Array,
             required:false,
         },
+        card_id:{
+            type:Number,
+            required:false,
+        },
+        count_of_checked:{
+            type:Number,
+            required:false,
+        }
         
     },
     computed: {
