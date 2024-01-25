@@ -1,26 +1,45 @@
-<template #default>
+<template>
 <ul>
-    <li v-for="(prod, index) in prods" :key="prod.id" @click="addProd(index)">id: {{ prod.id }} <br> <b>Название:</b> {{ prod.name }} <br> <b>Описание:</b> {{ prod.description }}</li>
+    <li class="prod" v-for="(prod, index) in prods" :key="prod.id">id: {{ prod.id }} <br> <b>Название:</b> {{ prod.name }} <br> <b>Описание:</b> {{ prod.description }} <br> <b>Цена:</b> {{ prod.price }}
+    <button v-if="token" @click="addProd(prod.id)"> Добавить в корзину</button>
+    </li>
 </ul>
 </template>
 
 
-<script>
+<script scoped>
 export default {
     name: "Products",
-    props: {
-    prods: Object
+    computed: {
+    prods(){
+        return this.$store.getters.getProducts.data
+    },
+    token(){
+        return this.$store.getters.getToken
+    }
   },
   methods:{
-    addProd(index){
-        console.log(index)
-    }
-  }
+    async addProd(index){
+        if(this.token){
+          const res = await fetch(`https://jurapro.bhuser.ru/api-shop/cart/${index}`,{
+        method: "POST",
+        headers:{
+          'Content-Type': 'application/json',
+          'Authorization' : `Bearer ${this.token}`
+        }
+      })
+      const data = await res.json()
+        this.$store.dispatch('getCart',this.token)
+        }
+    },    
+  },
+
+
 }
 
 </script>
 
-<style>
+<style scoped>
 ul{
     list-style-type: none;
     margin:0;
@@ -33,6 +52,14 @@ li{
     margin:0;
     padding: 0;
     width: 200px;
-    height: 350px;
+    
+}
+.prod{
+  margin-top:50px;
+        padding: 10px;
+        color: white;
+        background-color: #1D1D1D;
+        border-radius: 4px;
+        text-align: justify;
 }
 </style>
